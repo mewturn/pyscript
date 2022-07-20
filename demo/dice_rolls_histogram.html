@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+  <py-env>
+    - matplotlib
+    - numpy
+</py-env>
+</head>
+
+<body>
+    <div id="outcome"></div>
+    <div id="plot"></div>
+
+<py-script>
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import random
+    import asyncio
+
+    async def foo():
+        current_roll_count = 0
+        dice_count = 2
+        interval = 0.1
+
+        sums = []
+
+        def roll(n):
+            outcomes = [random.randint(1, 6) for _ in range(n)]
+            return sum(outcomes)
+
+        while True:
+            await asyncio.sleep(interval)
+            current_roll_count += 1
+            outcome = roll(dice_count)
+            sums.append(outcome)
+            pyscript.write("outcome", f"Roll result -- You rolled a {outcome}!")
+    
+            plt.clf()
+            # plt.xticks(range(2, 14))
+            plt.hist(sums, bins=dice_count * 6 - 1)
+            plt.title(f"Roll number {current_roll_count}.")
+            pyscript.write("plot", plt)
+
+    # close the global PyScript pyscript_loader
+    pyscript_loader.close()
+    pyscript.run_until_complete(foo())
+</py-script>
+
+  </body>
+</html>

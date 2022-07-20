@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+  <py-env>
+    - matplotlib
+</py-env>
+</head>
+
+<body>
+    <div id="outcome"></div>
+    <div id="plot"></div>
+
+<py-script>
+    import matplotlib.pyplot as plt
+    import random
+    import asyncio
+    from collections import Counter
+
+    async def foo():
+        current_roll_count = 0
+        dice_count = 2
+
+        x = []
+        y = []
+
+        def roll():
+            return random.randint(1, 6), random.randint(1, 6)
+
+        while True:
+            await asyncio.sleep(0.1)
+            current_roll_count += 1
+            outcome = roll()
+            pyscript.write("outcome", f"Roll result -- You rolled {outcome}!")
+
+            x.append(outcome[0])
+            y.append(outcome[1])
+            counts = Counter([(i, j) for i, j in zip(x, y)])
+            size = [25 * counts[(i, j)] for i, j in zip(x, y)]
+            # color = [get_color(counts[(i, j)]) for i, j in zip(x, y)]
+    
+            plt.clf()
+            plt.scatter(x, y, s=size, c=size)
+            plt.title(f"Roll number {current_roll_count}.")
+            pyscript.write("plot", plt)
+
+    # close the global PyScript pyscript_loader
+    pyscript_loader.close()
+    pyscript.run_until_complete(foo())
+</py-script>
+
+  </body>
+</html>

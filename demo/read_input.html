@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+  <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+  <py-env>
+    - nltk
+  </py-env>
+</head>
+
+<body>
+  <div>Convert an affiliate product title to query autocomplete term</div>
+  <br>
+
+  <input type="text" id="test-input" style="width: 555px; border: 0.25px solid black; border-radius: 4px;" value="iPhone 13 Pro Max 128GB Alpine Green - Apple (SG) MNCY3"/>
+  <button id="submit-button" type="submit" pys-onClick="my_function">GO!</button>
+  <br><br>
+
+  <div id="test-output"></div>
+  <br>
+  <br>
+  <div id="debug-output"></div>
+  <br><br><br>
+
+  <div id="status-punkt">punkt not ready, please wait...</div>
+  <div id="status-tagger">tagger not ready, please wait...</div>
+
+  <!-- NLTK stuff: https://github.com/nltk/nltk_data/blob/gh-pages/index.xml-->
+  <!-- NLTK tag set: https://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html -->
+<py-script>
+    from js import fetch
+    import nltk
+    from pathlib import Path
+    import os, sys, io, zipfile
+    import asyncio
+
+    async def install_punkt():
+        response = await fetch('https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/tokenizers/punkt.zip')
+        js_buffer = await response.arrayBuffer()
+        py_buffer = js_buffer.to_py()  # this is a memoryview
+        stream = py_buffer.tobytes()  # now we have a bytes object
+        
+        d = Path("/nltk_data/tokenizers")
+        d.mkdir(parents=True, exist_ok=True)
+        
+        Path('/nltk_data/tokenizers/punkt.zip').write_bytes(stream)
+        
+        # extract punkt.zip
+        zipfile.ZipFile('/nltk_data/tokenizers/punkt.zip').extractall(
+            path='/nltk_data/tokenizers/'
+        )
+        
+        # check file contents in /nltk_data/tokenizers/
+        # print(os.listdir("/nltk_data/tokenizers/punkt"))
+
+    async def install_perceptron_tagger():
+        response = await fetch('https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/taggers/averaged_perceptron_tagger.zip')
+        js_buffer = await response.arrayBuffer()
+        py_buffer = js_buffer.to_py()  # this is a memoryview
+        stream = py_buffer.tobytes()  # now we have a bytes object
+        
+        d = Path("/nltk_data/taggers")
+        d.mkdir(parents=True, exist_ok=True)
+        
+        Path('/nltk_data/taggers/averaged_perceptron_tagger.zip').write_bytes(stream)
+        
+        # extract punkt.zip
+        zipfile.ZipFile('/nltk_data/taggers/averaged_perceptron_tagger.zip').extractall(
+            path='/nltk_data/taggers/'
+        )
+
+    async def install():
+        status_punkt = await install_punkt()
+        Element('status-punkt').element.innerText = ""
+
+        status_tagger = await install_perceptron_tagger()
+        Element('status-tagger').element.innerText = ""
+
+    await install()
+
+    # we can read these config from yaml as well (or from another python dataclass via imports)
+    keep_tags = ["NN", "NNS", "NNP", "NNPS"]
+    stopwords = ["xs", "xl", "fl", "oz", "bad_word"]
+    
+    def tag(s):
+        t = [i.lower() for i in nltk.word_tokenize(s)]
+        return nltk.pos_tag(t)
+
+    def select(t):
+        return " ".join(
+            [word for word, tag in t if tag in keep_tags and word not in stopwords]
+        )
+
+    def my_function(*args, **kwargs):
+
+        #print('args:', args)
+        #print('kwargs:', kwargs)
+
+        console.log(f'args: {args}')
+        console.log(f'kwargs: {kwargs}')
+        
+        text = Element('test-input').element.value
+
+        #print('text:', text)
+        console.log(f'text: {text}')
+
+        tagged_output = tag(text)
+        selected_output = select(tagged_output)
+
+        Element('test-output').element.innerText = f"Query autocomplete term:\n{selected_output}"
+        Element('debug-output').element.innerText = f"Debug Info:\nTagged result: {tagged_output}"
+    
+</py-script>
+
+  </body>
+</html>

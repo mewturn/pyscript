@@ -1,0 +1,78 @@
+<!-- Displaying text (or objects) on the browser -->
+<html>
+    <head>
+        <link rel="stylesheet" href="https://pyscript.net/alpha/pyscript.css" />
+        <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
+        <style>
+            hr {
+                height: 12.5px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Simple text -->
+        <h1>Displaying simple text</h1>
+        <div id="output-by-dom"></div>
+        <div id="output-by-pyscript-wrapper"></div>
+        <py-script>
+            # Modify the element innerText in a Javascript manner by element id
+            Element("output-by-dom").element.innerText = "1. Display using DOM by element id."
+
+            # Modify the element using the pyscript write wrapper by element id
+            pyscript.write("output-by-pyscript-wrapper", "2. Display using pyscript write wrapper.")
+
+            # Use print directly
+            print("3. Display using Python 'print'.")
+        </py-script>
+        
+        <hr>
+        <!-- List / Dict -->
+        <h1>Displaying containers like list or dict</h1>
+        <div id="element-list"></div>
+        <div id="write-list"></div>
+        <py-script>
+            l = [1, 2, 3]
+
+            Element("element-list").element.innerText = l
+            pyscript.write("write-list", l)
+            print(l)
+        </py-script>
+
+        <br>
+        <div id="element-dict"></div>
+        <div id="write-dict"></div>
+        <py-script>
+            d = {
+                "name": "pyscript",
+                "score": {
+                    "complexity": 1.5,
+                    "similarity": 0.2
+                }
+            }
+
+            Element("element-dict").element.innerText = d
+            pyscript.write("write-dict", d)
+            print(d)
+        </py-script>      
+
+        <hr>
+        <!-- Class -->
+        <h1>Displaying classes</h1>
+        <div id="element-class"></div>
+        <div id="write-class"></div>
+        <py-script>
+            class Circle:
+                def __init__(self, x, y):
+                    self.x = x
+                    self.y = y
+
+                #def __repr__(self):
+                #    return f"This is a circle with center ({self.x},{self.y})"
+            
+            c = Circle(0, 0)
+            print(c)
+            Element("element-class").element.innerText = c
+            pyscript.write("write-class", c)
+        </py-script>
+    </body>
+</html>
